@@ -1,0 +1,8 @@
+wandb
+./*.png
+__pycache__
+results
+*.npy
+*.png
+*.jpg
+log_dir*
