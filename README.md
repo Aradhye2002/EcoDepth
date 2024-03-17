@@ -1,1 +1,1 @@
-# Code for CVPR2024 paper : "Using ViT Embeddings is Better than a Pseudo Multimodal Approach: A New State-of-the-Art for Single Image Depth Estimation"
+# ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation
