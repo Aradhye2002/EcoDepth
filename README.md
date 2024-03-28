@@ -2,9 +2,9 @@
 <h1>ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation</h1>
 
 **CVPR 2024**  
-<a href='https://https://ecodepth-iitd.github.io/' style="margin-right: 20px;"><img src='https://img.shields.io/badge/Project Page-ECoDepth-darkgreen' alt='Project Page'></a>
+<a href='https://ecodepth-iitd.github.io/' style="margin-right: 20px;"><img src='https://img.shields.io/badge/Project Page-ECoDepth-darkgreen' alt='Project Page'></a>
 <a href="https://arxiv.org/abs" style="margin-right: 20px;"><img src='https://img.shields.io/badge/Paper-arXiv-maroon' alt='arXiv page'></a>
-<a href="https://arxiv.org/abs" style="margin-right: 20px;"><img src='https://img.shields.io/badge/Paper-CVF-blue' alt='IEEE Xplore Paper'></a>
+<a href="https://arxiv.org/abs" style="margin-right: 20px;"><img src='https://img.shields.io/badge/Paper-CvF-blue' alt='IEEE Xplore Paper'></a>
 
 [Suraj Patni](https://github.com/surajiitd)\*,
 [Aradhye Agarwal](https://github.com/Aradhye2002)\*,
