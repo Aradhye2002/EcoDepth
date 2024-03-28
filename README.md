@@ -63,7 +63,7 @@ We thank [Kartik Anand](https://github.com/k-styles) for assistance with the exp
 Our source code is inspired from [VPD](https://github.com/wl-zhao/VPD) and [PixelFormer](https://github.com/ashutosh1807/PixelFormer), we thank their authors for publicly releasing the code.
 
 ### BibTeX (Citation)
-If you find our work useful in your research, lease consider citing the following:
+If you find our work useful in your research, please consider citing the following:
 ``` bibtex
 TODO
 .
