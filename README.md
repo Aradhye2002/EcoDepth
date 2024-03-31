@@ -1,3 +1,6 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/ecodepth-effective-conditioning-of-diffusion/monocular-depth-estimation-on-nyu-depth-v2)](https://paperswithcode.com/sota/monocular-depth-estimation-on-nyu-depth-v2?p=ecodepth-effective-conditioning-of-diffusion)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/ecodepth-effective-conditioning-of-diffusion/monocular-depth-estimation-on-kitti-eigen)](https://paperswithcode.com/sota/monocular-depth-estimation-on-kitti-eigen?p=ecodepth-effective-conditioning-of-diffusion)
+
 <div align="center">
 <h1>ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation</h1>
 
@@ -19,10 +22,10 @@
 
 
 ## News
-- [Coming soon] Inference script for a single RGB image.
-- [Coming soon] Pretrained checkpoints for NYUv2 and KITTI datasets.
-- [March 2024] Training and Evaluation code released!
-- [Feb 2024] ECoDepth accepted in CVPR'2024.
+- `Coming soon` Inference script for a single RGB image.
+- `Coming soon` Pretrained checkpoints for NYUv2 and KITTI datasets.
+- `March 2024` Training and Evaluation code released!
+- `Feb 2024` ECoDepth accepted in CVPR'2024.
 
 
 ## Installation
