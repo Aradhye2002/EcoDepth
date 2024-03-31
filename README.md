@@ -13,14 +13,15 @@
 
 </div>
 
-<!-- display pdf -->
+
 
 ![Architecture Diagram](figs/aarch_diagram.png)
 
 
 ## News
+- [Coming soon] Inference script for a single RGB image.
 - [Coming soon] Pretrained checkpoints for NYUv2 and KITTI datasets.
-- [March 2024] Training and Inference code released!
+- [March 2024] Training and Evaluation code released!
 - [Feb 2024] ECoDepth accepted in CVPR'2024.
 
 
@@ -32,14 +33,44 @@ cd EcoDepth
 conda env create -f env.yml
 conda activate ecodepth
 ```
-## Dataset
-You can see the dataset preparation guide for NYUv2 and KITTI from [here](https://github.com/cleinc/bts). After Update the paths in the desired bash scripts for evaluation and training accordingly.
+## Dataset Setup
+You can see the dataset preparation guide for NYUv2 and KITTI from [here](https://github.com/cleinc/bts). After downloading the datasets change the paths in the desired bash scripts for evaluation and training, or you can also make a symbolic link of the dataset folders like this.
+``` bash
+cd depth; mkdir data;cd data
+ln -s <path_to_kitti_dataset> kitti
+ln -s <path_to_nyu_dataset> nyu
+```
+Note the dataset structure inside the path you have given in bash files should look like this:  
+**NYUv2**: 
+``` bash
+nyu
+├── nyu_depth_v2
+│   ├── official_splits
+│   └── sync
+```
+**KITTI**: 
+``` bash
+kitti
+├── KITTI
+│   ├── 2011_09_26
+│   ├── 2011_09_28
+│   ├── 2011_09_29
+│   ├── 2011_09_30
+│   └── 2011_10_03
+└── kitti_gt
+    ├── 2011_09_26
+    ├── 2011_09_28
+    ├── 2011_09_29
+    ├── 2011_09_30
+    └── 2011_10_03
+```
+
 ## Pretrained Models
 
-Please download the pretrained weights form [this link]() and save `.ckpt` inside `<repo root>/depth/checkpoints` directory.
+Please download the pretrained weights from [this link]() and save `.ckpt` weights inside `<repo root>/depth/checkpoints` directory.
 
 ## Evaluation
-To evaluate our performance on NYUv2 and KITTI datasets, use `test.py` file. The trained models are publicly available, download the models using [above links](#pretrained-models). Now go inside `depth` dir by `cd depth` and follow this:
+To evaluate our performance on NYUv2 and KITTI datasets, use `test.py` file. The trained models are publicly available, download the models using [above links](#pretrained-models). then navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
 
 1. **Evaluate on NYUv2 dataset**:  
 `bash test_nyu.sh <path_to_saved_model_of_NYU>`  
@@ -48,12 +79,12 @@ To evaluate our performance on NYUv2 and KITTI datasets, use `test.py` file. The
 `bash test_kitti.sh <path_to_saved_model_of_KITTI>`
 
 ## Training 
-We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Please set the `NPROC_PER_NODE` variable and `--batch_size` argument to set the batch size. We set them as `NPROC_PER_NODE=8` and `--batch_size=4`. So our effective batch_size is 32. Now go inside `depth` dir by `cd depth` and follow this: 
+We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `train_*.sh` set the `NPROC_PER_NODE` variable and `--batch_size` argument to set the batch size. We set them as `NPROC_PER_NODE=8` and `--batch_size=4`. So our effective batch_size is 32. then navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
 
 1. **Train on NYUv2 dataset**:  
 `bash train_nyu.sh`  
 
-2. **Train on KITTI dataset**:  
+1. **Train on KITTI dataset**:  
 `bash train_kitti.sh`
 
 ### Contact
@@ -64,7 +95,7 @@ We thank [Kartik Anand](https://github.com/k-styles) for assistance with the exp
 Our source code is inspired from [VPD](https://github.com/wl-zhao/VPD) and [PixelFormer](https://github.com/ashutosh1807/PixelFormer), we thank their authors for publicly releasing the code.
 
 ### BibTeX (Citation)
-If you find our work useful in your research, please consider citing the following:
+If you find our work useful in your research, please consider citing using:
 ``` bibtex
 @article{patni2024ecodepth,
   title={ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation},

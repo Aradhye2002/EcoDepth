@@ -11,13 +11,13 @@ import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from tensorboardX import SummaryWriter
 
-from models_depth.model import EcoDepth
-from models_depth.optimizer import build_optimizers
+from models.model import EcoDepth
+from models.optimizer import build_optimizers
 import utils_depth.metrics as metrics
 from utils_depth.criterion import SiLogLoss
 import utils_depth.logging as logging
 
-from dataset.base_dataset import get_dataset
+from dataloaders.base_dataset import get_dataset
 from configs.train_options import TrainOptions
 import utils
 import glob
@@ -298,13 +298,6 @@ def validate(val_loader, model, criterion_d, device, curr_epoch, args):
         result_metrics[metric] = 0.0
 
     for batch_idx, batch in enumerate(val_loader):
-        
-        ##########to change***********************
-        if batch_idx == 10:
-            break
-        ##########to change***********************
-        
-        
         input_RGB = batch['image'].to(device)
         depth_gt = batch['depth'].to(device)
         filename = batch['filename'][0]
@@ -456,9 +449,9 @@ def main():
         os.system("cp *.sh "+file_dir)
         command = "mkdir -p "+os.path.join(file_dir, 'configs') + '&& cp configs/*.py ' + os.path.join(file_dir, 'configs')
         os.system(command)
-        command = "mkdir -p "+os.path.join(file_dir, 'dataset') + '&& cp dataset/*.py ' + os.path.join(file_dir, 'dataset')
+        command = "mkdir -p "+os.path.join(file_dir, 'dataloaders') + '&& cp dataloaders/*.py ' + os.path.join(file_dir, 'dataloaders')
         os.system(command)
-        command = "mkdir -p "+os.path.join(file_dir, 'models_depth') + '&& cp models_depth/*.py ' + os.path.join(file_dir, 'models_depth')
+        command = "mkdir -p "+os.path.join(file_dir, 'models') + '&& cp models/*.py ' + os.path.join(file_dir, 'models')
         os.system(command)
         command = "mkdir -p "+os.path.join(file_dir, 'utils_depth') + '&& cp utils_depth/*.py ' + os.path.join(file_dir, 'utils_depth')
         os.system(command)
@@ -521,11 +514,6 @@ def main():
     
     global last_save_epoch
     last_save_epoch = -1
-    
-    ##########to change***********************
-    args.val_freq = 1
-    args.model_save_freq = 1
-    ##########to change***********************
     
     # Perform experiment
     for curr_epoch in range(start_ep, args.epochs + 1):
