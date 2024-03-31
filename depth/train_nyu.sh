@@ -1,7 +1,7 @@
-NPROC_PER_NODE=8
+NPROC_PER_NODE=1 #8
 NO_CPU_CORES=64
 
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+export CUDA_VISIBLE_DEVICES=5 #,1,2,3,4,5,6,7
 export OMP_NUM_THREADS=$((NO_CPU_CORES / NPROC_PER_NODE))
 export TOKENIZERS_PARALLELISM=false
 
@@ -18,10 +18,8 @@ python -m torch.distributed.run \
     train.py \
     --batch_size 4 \
     --dataset nyudepthv2 \
-    --data_path /home/aradhye/scratch/Datasets/ \
+    --data_path ./data/nyu \
     --weight_decay 0.1 \
-    --crop_h 480 \
-    --crop_w 640 \
     --num_filters 32 32 32 \
     --deconv_kernels 2 2 2 \
     --flip_test \
@@ -34,9 +32,8 @@ python -m torch.distributed.run \
     --vit_model google/vit-base-patch16-224 \
     --learning_rate_schedule one_cycle \
     --gradient_accumulation False \
-    --num_of_diffusion_step 1 \
     --epochs 25 \
-    --log_dir log_dir_vision04 \
+    --log_dir log_dir \
     --log_in_wandb True \
     --eigen_crop_in_dataloader_itself_for_nyu False \
     --min_depth_eval 1e-3 \
