@@ -1,7 +1,7 @@
 NPROC_PER_NODE=1 #8
 NO_CPU_CORES=64
 
-export CUDA_VISIBLE_DEVICES=5 #,1,2,3,4,5,6,7
+export CUDA_VISIBLE_DEVICES=6 #,1,2,3,4,5,6,7
 export OMP_NUM_THREADS=$((NO_CPU_CORES / NPROC_PER_NODE))
 export TOKENIZERS_PARALLELISM=false
 
@@ -13,7 +13,7 @@ python -m torch.distributed.run \
     --standalone \
     --nnodes=1 \
     --rdzv_backend=c10d \
-    --rdzv_endpoint=localhost:0 \
+    --rdzv_endpoint=localhost:1234 \
     --nproc_per_node=${NPROC_PER_NODE} \
     train.py \
     --batch_size 4 \
