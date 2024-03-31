@@ -17,18 +17,15 @@ from pathlib import Path
 
 import torch
 import torch.distributed as dist
-# from torch._six import inf
 from torch import inf
 from torchvision import transforms
 import cv2
 import random
 import os
-import numpy as np
-import torch
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-def seed_everything_for_reproducibility(seed=42):
+def seed_everything(seed=42):
     """
     For REPRODUCIBILITY 
     Official source: https://pytorch.org/docs/stable/notes/randomness.html#reproducibility
@@ -38,11 +35,8 @@ def seed_everything_for_reproducibility(seed=42):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    # to 
-    torch.backends.cudnn.deterministic = True
-    # To NOT randomly choose which algo to use for CUDNN operations like convolution,etc.
-    # benchmark=True will improve training performance but will lose reproducibility.
-    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True # To NOT randomly choose which algo to use for CUDNN operations like convolution,etc.
+    torch.backends.cudnn.benchmark = False # benchmark=True will improve training performance but will lose reproducibility.
     torch.use_deterministic_algorithms(True, warn_only=True)
 
 
@@ -544,18 +538,20 @@ def auto_load_model(args, model, model_without_ddp, optimizer, loss_scaler, mode
             print("With optim & sched!")
 
 
-def colorize_depth(depth, cmap="magma_r", vmin=None,vmax=None):
-
+def colorize_depth(depth, cmap="inferno_r", vmin=None,vmax=None):
+    
     vmin = np.min(depth) if vmin is None else vmin
     vmax = np.max(depth) if vmax is None else vmax
     depth = np.clip(depth,vmin,vmax)
     depth[0,0] = vmin
     depth[-1,-1] = vmax
+    depth[depth==0] = vmax
     colormap = cm.get_cmap(cmap)
     colorized_depth = colormap((depth-vmin)/(vmax-vmin)) #first convert from 0-1 then from 0-255 in below line.
     #colored_depth = colormap(depth)
     colorized_depth = (colorized_depth[:,:,:3]*255).astype(np.uint8)
     return colorized_depth
+
 
 def cosine_annealing(global_step, tot_iterations, n_cycles, max_lr):
     """cosine annealing learning rate schedule.
@@ -564,6 +560,15 @@ def cosine_annealing(global_step, tot_iterations, n_cycles, max_lr):
     cos_inner = (math.pi * (global_step % iters_per_cycle)) / (iters_per_cycle)
 
     return max_lr/2 * (math.cos(cos_inner) + 1)
+
+def visualize(img, pred_color, depth_gt):
+    invalid_sky_region = 50
+    img = img[invalid_sky_region:,...]
+    depth_gt = depth_gt[invalid_sky_region:,...]
+    pred_color = pred_color[invalid_sky_region:,...]
+
+    viz = np.vstack((img, depth_gt, pred_color))[:,:,::-1]
+    return viz
 
 def visualize_garg_crop_rectangle(depth):
     # Define the slice coordinates
@@ -574,7 +579,9 @@ def visualize_garg_crop_rectangle(depth):
     slice_left = int(0.03594771 * gt_width)
     slice_right = int(0.96405229 * gt_width)
 
-    # Draw a rectangle on the image
-    # import ipdb;ipdb.set_trace()
+    # visualize rectangle 
     depth = cv2.rectangle(depth, (slice_left, slice_top), (slice_right, slice_bottom), color=(250, 250, 0), thickness=2)
+    # crop the image
+    # depth = depth[slice_top:slice_bottom, slice_left: slice_right, ...]
     return depth
+

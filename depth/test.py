@@ -18,7 +18,7 @@ from dataset.base_dataset import get_dataset
 from configs.test_options import TestOptions
 import utils
 from tqdm import tqdm
-from utils import colorize_depth
+from utils import colorize_depth, visualize, visualize_garg_crop_rectangle
 
 metric_name = ['d1', 'd2', 'd3', 'abs_rel', 'sq_rel', 'rmse', 'rmse_log',
                'log10', 'silog']
@@ -70,7 +70,7 @@ def main():
     model_weight = torch.load(args.ckpt_dir)['model']
     if 'module' in next(iter(model_weight.items()))[0]:
         model_weight = OrderedDict((k[7:], v) for k, v in model_weight.items())
-    model.load_state_dict(model_weight, strict=False)
+    model.load_state_dict(model_weight, strict=True)
     model.eval()
 
     model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=False)
@@ -78,7 +78,6 @@ def main():
 
     # Dataset setting
     dataset_kwargs = {'dataset_name': args.dataset, 'data_path': args.data_path, 'args': args}
-    dataset_kwargs['crop_size'] = (args.crop_h, args.crop_w)
 
     val_dataset = get_dataset(**dataset_kwargs, is_train=False)
 
@@ -156,10 +155,9 @@ def validate(val_loader, model, device, args):
             new_input_RGB = torch.zeros(bs, 3, new_h, new_w).to(input_RGB.device)
             new_input_RGB[:, :, :old_h, :old_w] = input_RGB
             input_RGB = new_input_RGB
-            
-            _, pred, logits_to_save = model(input_RGB, is_train=False)
+            with torch.no_grad():
+                pred = model(input_RGB)
             pred_d = pred['pred_d']
-
             #undo padding
             new_pred_d = pred_d[:, :, :old_h, :old_w]
             pred_d = new_pred_d
@@ -221,7 +219,6 @@ def validate(val_loader, model, device, args):
 
             cv2.imwrite(save_path, pred_d.astype(np.uint16),
                         [cv2.IMWRITE_PNG_COMPRESSION, 0])
-            
         if args.save_visualize:
             save_path = os.path.join(result_path, "depth_color", filename)
             pred_d_numpy = pred_d/scale_factor # convert back to metres
@@ -229,41 +226,31 @@ def validate(val_loader, model, device, args):
                 eval_mask = np.zeros_like(pred_d_numpy)
                 eval_mask[45:471, 41:601] = 1
                 pred_d_numpy[eval_mask==0] = 0
-                vmin = min(torch.min(depth_gt).item(), pred_d_numpy.min())
-                vmax = max(torch.max(depth_gt).item(), pred_d_numpy.max())
+                depth_gt = depth_gt.detach().cpu().numpy()
+                vmin = min(depth_gt.min(), pred_d_numpy.min())
+                # take vmax from percentile to avoid the erroneous max depth pixels.
+                vmax = max(np.percentile(depth_gt, 98), np.percentile(pred_d_numpy, 98))
+                # vmax = max(depth_gt.max(), pred_d_numpy.max())
                 pred_d_color = colorize_depth(pred_d_numpy,vmin=vmin,vmax=vmax)
-                depth_gt = colorize_depth(depth_gt.detach().cpu().numpy(), vmin=vmin, vmax=vmax)
-                
-                cv2.imwrite(save_path, np.hstack((depth_gt, pred_d_color)))
+                depth_gt = colorize_depth(depth_gt, vmin=vmin, vmax=vmax)
+
+                cv2.imwrite(save_path, np.hstack((depth_gt, pred_d_color))[:,:,::-1])
             elif args.dataset=="kitti":
                 depth_gt = depth_gt.detach().cpu().numpy()
                 vmin = depth_gt.min()
                 vmax = depth_gt.max()
                 valid_mask = depth_gt>0
                 pred_d_color = colorize_depth(pred_d_numpy,vmin=vmin,vmax=vmax)
-                pred_d_color = visualize_garg_crop_rectangle(pred_d_color.copy())
+                # pred_d_color = visualize_garg_crop_rectangle(pred_d_color.copy())
                 depth_gt = colorize_depth(depth_gt, vmin=vmin, vmax=vmax)
                 depth_gt[valid_mask==0] = 0
-                depth_gt = visualize_garg_crop_rectangle(depth_gt.copy())
-                
+                # depth_gt = visualize_garg_crop_rectangle(depth_gt.copy())
+
                 img = batch["image"][0].cpu().numpy().transpose((1,2,0))*255
-                viz = np.vstack((img, depth_gt, pred_d_color))[:,:,::-1]
-                cv2.imwrite(save_path, viz)
-            elif args.dataset=="vkitti2" or args.dataset == "diode_outdoor":
-                depth_gt = depth_gt.detach().cpu().numpy()
-                vmin = 0
-                vmax = 80
-                valid_mask = depth_gt>0
-                pred_d_color = colorize_depth(pred_d_numpy,vmin=vmin,vmax=vmax)
-                if args.kitti_crop == "garg_crop":    
-                    pred_d_color = visualize_garg_crop_rectangle(pred_d_color.copy())
-                depth_gt = colorize_depth(depth_gt, vmin=vmin, vmax=vmax)
-                depth_gt[valid_mask==0] = 0
-                if args.kitti_crop == "garg_crop":    
-                    depth_gt = visualize_garg_crop_rectangle(depth_gt.copy())
+                # img = visualize_garg_crop_rectangle(img.copy())
                 
-                img = batch["image"][0].cpu().numpy().transpose((1,2,0))*255
-                viz = np.vstack((img, depth_gt, pred_d_color))[:,:,::-1]
+                # stack all colored images and save
+                viz = visualize(img, pred_d_color, depth_gt)
                 cv2.imwrite(save_path, viz)
             else:
                 raise NotImplementedError
@@ -278,7 +265,6 @@ def validate(val_loader, model, device, args):
 
     ddp_logger.synchronize_between_processes()
 
-    np.save("individual_rmse_errors_MDPMDP.npy",individual_rmse_errors)
     for key in result_metrics.keys():
         result_metrics[key] = ddp_logger.meters[key].global_avg
 
@@ -290,17 +276,7 @@ def get_print_string(computed_result,i):
         print_string += f"{key} = {(computed_result[key]/i):.3f}, "
     return print_string
 
-def visualize_garg_crop_rectangle(depth):
-    # Define the slice coordinates
-    gt_height, gt_width, _ = depth.shape
-    # garg crop
-    slice_top = int(0.40810811 * gt_height)
-    slice_bottom = int(0.99189189 * gt_height)
-    slice_left = int(0.03594771 * gt_width)
-    slice_right = int(0.96405229 * gt_width)
 
-    depth = cv2.rectangle(depth, (slice_left, slice_top), (slice_right, slice_bottom), color=(250, 250, 0), thickness=2)
-    return depth
 
 
 if __name__ == '__main__':

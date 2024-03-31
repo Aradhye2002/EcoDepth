@@ -24,7 +24,7 @@ class BaseOptions():
         parser.add_argument('--gpu_or_cpu',   type=str, default='gpu')
         parser.add_argument('--data_path',    type=str, default='/data/ssd1/')
         parser.add_argument('--dataset',      type=str, default='nyudepthv2',
-                            choices=['nyudepthv2', 'kitti', 'imagepath', 'vkitti', 'sunrgbd', 'ibims', 'diode_indoors_val', 'hypersim', 'vkitti2', 'diode_outdoor', 'DDAD', 'DIML'])
+                            choices=['nyudepthv2', 'kitti'])
         parser.add_argument('--batch_size',   type=int, default=8)
         parser.add_argument('--workers',      type=int, default=4)
         
@@ -48,7 +48,7 @@ class BaseOptions():
         parser.add_argument('--flip_test', action='store_true')       
         parser.add_argument('--no_of_classes', type=int, default='100')
         parser.add_argument('--vit_model', type=str, default='vit_base_patch16_224')
-        parser.add_argument('--num_of_diffusion_step', type=int, help='num of diffusion steps to take', default=1) 
+        parser.add_argument('--kitti_split_to_half', type=str2bool, default='True') 
         parser.add_argument('--eigen_crop_in_dataloader_itself_for_nyu', type=str2bool, default='False') 
         parser.add_argument('--use_right', type=str2bool, default='False')  
         parser.add_argument('--cutflip', type=str2bool, default='False')  
