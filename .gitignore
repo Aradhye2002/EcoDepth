@@ -2,3 +2,5 @@ checkpoints
 index.html
 *.html
 *.htm
+data/*
+*.npy

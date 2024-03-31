@@ -5,4 +5,9 @@ results
 *.npy
 *.png
 *.jpg
+index.*
+*.ckpt
+*.npy
+results/*
+data/*
 log_dir*
