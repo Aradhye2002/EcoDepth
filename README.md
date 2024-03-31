@@ -1,6 +1,3 @@
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/ecodepth-effective-conditioning-of-diffusion/monocular-depth-estimation-on-nyu-depth-v2)](https://paperswithcode.com/sota/monocular-depth-estimation-on-nyu-depth-v2?p=ecodepth-effective-conditioning-of-diffusion)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/ecodepth-effective-conditioning-of-diffusion/monocular-depth-estimation-on-kitti-eigen)](https://paperswithcode.com/sota/monocular-depth-estimation-on-kitti-eigen?p=ecodepth-effective-conditioning-of-diffusion)
-
 <div align="center">
 <h1>ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation</h1>
 
