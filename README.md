@@ -19,10 +19,10 @@
 
 
 ## News
-- `Coming soon` Inference script for a single RGB image.
-- `Coming soon` Pretrained checkpoints for NYUv2 and KITTI datasets.
-- `March 2024` Training and Evaluation code released!
-- `Feb 2024` ECoDepth accepted in CVPR'2024.
+- [Coming soon] Inference script for a single RGB image.
+- [March 2024] Pretrained checkpoints for NYUv2 and KITTI datasets.
+- [March 2024] Training and Evaluation code released!
+- [Feb 2024] ECoDepth accepted in CVPR'2024.
 
 
 ## Installation
@@ -40,7 +40,7 @@ cd depth; mkdir data;cd data
 ln -s <path_to_kitti_dataset> kitti
 ln -s <path_to_nyu_dataset> nyu
 ```
-Note the dataset structure inside the path you have given in bash files should look like this:  
+Note the dataset structure inside the path you have given in the bash files should look like this:  
 **NYUv2**: 
 ``` bash
 nyu
@@ -67,10 +67,12 @@ kitti
 
 ## Pretrained Models
 
-Please download the pretrained weights from [this link]() and save `.ckpt` weights inside `<repo root>/depth/checkpoints` directory.
+Please download the pretrained weights from [this link](https://drive.google.com/drive/folders/1BVWLrdHw0bfsuzzL62S7xpWmmqgvysxd?usp=sharing) and save `.ckpt` weights inside `<repo root>/depth/checkpoints` directory.
+
+Also download the v1-5 checkpoint of [stable-diffusion](https://github.com/runwayml/stable-diffusion) and put it in the `<repo root>/checkpoints` directory. Please create an empty directory if you find that such a path does not exist. Note that this checkpoints folder is different from the one above. 
 
 ## Evaluation
-To evaluate our performance on NYUv2 and KITTI datasets, use `test.py` file. The trained models are publicly available, download the models using [above links](#pretrained-models). then navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
+To evaluate the model performance on NYUv2 and KITTI datasets, use `test.py` file. The trained models are publicly available, download the models using [above links](#pretrained-models). then navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
 
 1. **Evaluate on NYUv2 dataset**:  
 `bash test_nyu.sh <path_to_saved_model_of_NYU>`  
@@ -79,7 +81,7 @@ To evaluate our performance on NYUv2 and KITTI datasets, use `test.py` file. The
 `bash test_kitti.sh <path_to_saved_model_of_KITTI>`
 
 ## Training 
-We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `train_*.sh` set the `NPROC_PER_NODE` variable and `--batch_size` argument to set the batch size. We set them as `NPROC_PER_NODE=8` and `--batch_size=4`. So our effective batch_size is 32. then navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
+We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `train_*.sh` set the `NPROC_PER_NODE` variable and `--batch_size` argument to the desired values. For our method we set them as `NPROC_PER_NODE=8` and `--batch_size=4` (hence a total batch size of 32). Afterwards, navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
 
 1. **Train on NYUv2 dataset**:  
 `bash train_nyu.sh`  
