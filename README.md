@@ -19,7 +19,7 @@
 
 
 ## News
-- [Coming soon] Inference script for a single RGB image.
+- **[April 2024] Inference scripts for video or image to depth.**
 - [March 2024] Pretrained checkpoints for NYUv2 and KITTI datasets.
 - [March 2024] Training and Evaluation code released!
 - [Feb 2024] ECoDepth accepted in CVPR'2024.
@@ -34,9 +34,11 @@ conda env create -f env.yml
 conda activate ecodepth
 ```
 ## Dataset Setup
-You can see the dataset preparation guide for NYUv2 and KITTI from [here](https://github.com/cleinc/bts). After downloading the datasets change the paths in the desired bash scripts for evaluation and training, or you can also make a symbolic link of the dataset folders like this.
+You can take a look at the dataset preparation guide for NYUv2 and KITTI from [here](https://github.com/cleinc/bts). After downloading the datasets, change the data paths in the respective bash files to point to your dataset location where you have downloaded the datasets. Alternatively, you can also make a symbolic link of the dataset folders like so:
 ``` bash
-cd depth; mkdir data;cd data
+cd depth
+mkdir data
+cd data
 ln -s <path_to_kitti_dataset> kitti
 ln -s <path_to_nyu_dataset> nyu
 ```
@@ -71,8 +73,18 @@ Please download the pretrained weights from [this link](https://drive.google.com
 
 Also download the v1-5 checkpoint of [stable-diffusion](https://github.com/runwayml/stable-diffusion) and put it in the `<repo root>/checkpoints` directory. Please create an empty directory if you find that such a path does not exist. Note that this checkpoints folder is different from the one above. 
 
+## Inference
+
+To perform inference on any RGB image or video use the `infer_{outdoor,indoor}.sh` file. Set the `--img_path` argument to the image you would to get the depth for and the `--video_path` to the video from which to produce the depth. In case you only wish to infer on an img or video, simply remove the other argument. Then enter the `depth` directory by executing `cd depth` and run:
+
+1. **Infer on outdoor scenes**
+`bash infer_outdoor.sh`
+
+2. **Infer on outdoor scenes**
+`bash infer_indoor.sh`
+
 ## Evaluation
-To evaluate the model performance on NYUv2 and KITTI datasets, use `test.py` file. The trained models are publicly available, download the models using [above links](#pretrained-models). then navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
+To evaluate the model performance on NYUv2 and KITTI datasets, use the `test_{kitti, nyu}` file. The trained models are publicly available, download the models using [above links](#pretrained-models). Then, navigate to the `depth` directory and follow the instructions outlined below:
 
 1. **Evaluate on NYUv2 dataset**:  
 `bash test_nyu.sh <path_to_saved_model_of_NYU>`  
@@ -81,7 +93,7 @@ To evaluate the model performance on NYUv2 and KITTI datasets, use `test.py` fil
 `bash test_kitti.sh <path_to_saved_model_of_KITTI>`
 
 ## Training 
-We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `train_*.sh` set the `NPROC_PER_NODE` variable and `--batch_size` argument to the desired values. For our method we set them as `NPROC_PER_NODE=8` and `--batch_size=4` (hence a total batch size of 32). Afterwards, navigate to the `depth` directory by executing `cd depth` and follow the instructions outlined below:
+We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `train_{kitti,nyu}.sh` set the `NPROC_PER_NODE` variable and `--batch_size` argument to the desired values as per your system resources. For our method we set them as `NPROC_PER_NODE=8` and `--batch_size=4` (resulting in a total batch size of 32). Afterwards, navigate to the `depth` directory by executing `cd depth` and follow the instructions:
 
 1. **Train on NYUv2 dataset**:  
 `bash train_nyu.sh`  
@@ -90,11 +102,11 @@ We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `tra
 `bash train_kitti.sh`
 
 ### Contact
-If you have any questions about our code or paper, kindly raise an issue on Github.
+If you have any questions about our code or paper, kindly raise an issue on this repository.
 
 ### Acknowledgment
 We thank [Kartik Anand](https://github.com/k-styles) for assistance with the experiments. 
-Our source code is inspired from [VPD](https://github.com/wl-zhao/VPD) and [PixelFormer](https://github.com/ashutosh1807/PixelFormer), we thank their authors for publicly releasing the code.
+Our source code is inspired from [VPD](https://github.com/wl-zhao/VPD) and [PixelFormer](https://github.com/ashutosh1807/PixelFormer). We thank their authors for publicly releasing the code.
 
 ### BibTeX (Citation)
 If you find our work useful in your research, please consider citing using:
