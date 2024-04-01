@@ -11,3 +11,4 @@ index.*
 results/*
 data/*
 log_dir*
+checkpoints/*
