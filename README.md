@@ -13,9 +13,8 @@
 
 </div>
 
+![driving.png](assets/driving.png)
 
-
-![Architecture Diagram](figs/aarch_diagram.png)
 
 
 ## News
@@ -77,10 +76,10 @@ Also download the v1-5 checkpoint of [stable-diffusion](https://github.com/runwa
 
 To perform inference on any RGB image or video use the `infer_{outdoor,indoor}.sh` file. Set the `--img_path` argument to the image you would to get the depth for and the `--video_path` to the video from which to produce the depth. In case you only wish to infer on an img or video, simply remove the other argument. Then enter the `depth` directory by executing `cd depth` and run:
 
-1. **Infer on outdoor scenes**
+1. **Infer on outdoor scenes**:
 `bash infer_outdoor.sh`
 
-2. **Infer on outdoor scenes**
+2. **Infer on outdoor scenes**:
 `bash infer_indoor.sh`
 
 ## Evaluation
