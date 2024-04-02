@@ -1,4 +1,3 @@
-
 import torch.nn as nn
 import torch
 import random
@@ -10,6 +9,9 @@ from omegaconf import OmegaConf
 from ldm.util import instantiate_from_config
 import torch.nn.functional as F
 from ecodepth.models import UNetWrapper, EmbeddingAdapter
+
+from transformers import logging
+logging.set_verbosity_error()
 
 class Identity(nn.Module):
     def __init__(self):

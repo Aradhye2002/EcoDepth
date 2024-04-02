@@ -76,7 +76,14 @@ def visualize(img, depth):
     
     # obtain depth map using colorize_depth
     # take log of depth to put greater focus on nearer objects
+    
+    # remove the top portion and a little bottom part to get a better visualization 
+    
+    img = img[60:-20, :-20]
+
     depth_map = colorize_depth(np.log(depth))
+    
+    depth_map = depth_map[60:-20, :-20]
     
     # reverse the colour channel to get a better visual effect
     depth_map = depth_map[:, :, ::-1]
@@ -134,18 +141,14 @@ def main():
         success, img = vidcap.read()
         h, w, _ = img.shape
         frame_rate = 30.0
-        video = cv2.VideoWriter(depth_path, cv2.VideoWriter_fourcc(*"MJPG"), frame_rate, (2*w, h))
+        video = cv2.VideoWriter(depth_path, cv2.VideoWriter_fourcc(*"MJPG"), frame_rate, (2*w-40, h-80))
         
         while(success):
-            
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
-            
             # get depth
             depth = predict(img, model, device)
             
             # get visualization
             viz = visualize(img, depth)
-            
             # write visualization to file
             video.write(viz)
         
