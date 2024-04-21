@@ -1,4 +1,4 @@
-name: ecodepth3
+name: ecodepth_mps
 channels:
   - defaults
 dependencies:
