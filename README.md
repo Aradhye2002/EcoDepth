@@ -110,10 +110,12 @@ Our source code is inspired from [VPD](https://github.com/wl-zhao/VPD) and [Pixe
 ### BibTeX (Citation)
 If you find our work useful in your research, please consider citing using:
 ``` bibtex
-@article{patni2024ecodepth,
-  title={ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation},
-  author={Patni, Suraj and Agarwal, Aradhye and Arora, Chetan},
-  journal={arXiv preprint arXiv:2403.18807},
-  year={2024}
+@InProceedings{Patni_2024_CVPR,
+    author    = {Patni, Suraj and Agarwal, Aradhye and Arora, Chetan},
+    title     = {ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
+    year      = {2024},
+    pages     = {28285-28295}
 }
 ```
