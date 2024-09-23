@@ -70,7 +70,7 @@ kitti
 
 Please download the pretrained weights from [this link](https://drive.google.com/drive/folders/1BVWLrdHw0bfsuzzL62S7xpWmmqgvysxd?usp=sharing) and save `.ckpt` weights inside `<repo root>/depth/checkpoints` directory.
 
-Also download the v1-5 checkpoint of [stable-diffusion](https://github.com/runwayml/stable-diffusion) and put it in the `<repo root>/checkpoints` directory. Please create an empty directory if you find that such a path does not exist. Note that this checkpoints folder is different from the one above. 
+Also download the v1-5 checkpoint of [stable-diffusion](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/blob/main/v1-5-pruned-emaonly.ckpt) and put it in the `<repo root>/checkpoints` directory. Please create an empty directory if you find that such a path does not exist. Note that this checkpoints folder is different from the one above. 
 
 ## Inference
 
