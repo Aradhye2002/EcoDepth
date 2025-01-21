@@ -1,0 +1,14 @@
+{
+    "test_data_path" : "../datasets/nyu_depth_v2/official_splits/test",
+    "test_filenames_path" : "../filenames/nyu_depth_v2/test_list.txt",
+    "ckpt_path" : "",
+    "scene" : "indoor",
+    "test_depth_factor" : 1000,
+    "num_workers" : 8,
+    "max_depth" : 10.0,
+    "no_of_classes" : 100,
+    "use_cut_depth" : false,
+    "do_random_crop" : false,
+    "train_from_scratch" : false,
+    "eval_crop" : "eigen"
+}

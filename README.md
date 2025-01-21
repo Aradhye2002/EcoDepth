@@ -1,5 +1,5 @@
 <div align="center">
-<h1>ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation</h1>
+<h1>ECoDepth v2.0.0</h1>
 
 **CVPR 2024**  
 <a href='https://ecodepth-iitd.github.io' style="margin-right: 20px;"><img src='https://img.shields.io/badge/Project Page-ECoDepth-darkgreen' alt='Project Page'></a>
@@ -13,8 +13,9 @@
 
 </div>
 
-![driving.png](assets/driving.png)
+Welcome to the **restructured codebase** for **ECoDepth**, our official implementation for monocular depth estimation (MDE) as presented in our CVPR 2024 paper. This repository has been significantly reorganized to improve usability, readability, and extensibility. 
 
+> **Important:** The original code used to generate the results in our paper is tagged as [v1.0.0](https://github.com/Aradhye2002/EcoDepth/releases/tag/v1.0.0), which you can download from the Releases section. For most practical purposes—such as training on custom datasets or performing inference—**we strongly recommend using the new [v2.0.0](https://github.com/Aradhye2002/EcoDepth/releases/tag/v2.0.0)** outlined here.
 
 
 ## News
@@ -23,99 +24,229 @@
 - [March 2024] Training and Evaluation code released!
 - [Feb 2024] ECoDepth accepted in CVPR'2024.
 
+## Table of Contents
+1. [Overview of v2.0.0 Improvements](#overview-of-v200-improvements)
+2. [Setup](#setup)
+3. [Dataset Download (NYU Depth V2)](#dataset-download-nyu-depth-v2)
+4. [DepthDataset API](#depthdataset-api)
+5. [EcoDepth Model API](#ecodepth-model-api)
+6. [Training Workflow](#training-workflow)
+7. [Testing Workflow](#testing-workflow)
+8. [Inference Workflow](#inference-workflow)
+9. [Citation](#citation)
 
-## Installation
 
-``` bash
-git clone https://github.com/Aradhye2002/EcoDepth
-cd EcoDepth
-conda env create -f env.yml
-conda activate ecodepth
+
+## Overview of v2.0.0 Improvements
+
+1. **Integrated Model Downloading**  
+   - In the previous version (v1.0.0), you had to manually download our checkpoints from Google Drive and place them in the correct directory. Now, the model is automatically downloaded and cached on the first run in `EcoDepth/checkpoints`. Subsequent runs will use the cached checkpoints automatically.
+
+2. **Generic DepthDataset Module**  
+   - We provide a new, flexible `DepthDataset` module that loads any custom dataset for MDE training. This was a frequent feature request. Detailed usage is given in the [DepthDataset API](#depthdataset-api) section.
+
+3. **PyTorch Lightning Integration**  
+   - The `EcoDepth` model is now a subclass of `LightningModule`, allowing for streamlined training and inference workflows via PyTorch Lightning. This also makes it straightforward to export models to ONNX or TorchScript for production use.
+
+4. **Config-Based Workflows**  
+   - We replaced bash scripts with user-friendly JSON configs, making it clearer to specify training, testing, and inference parameters.
+
+5. **Reduced Dependencies & Simplified Setup**  
+   - We removed the requirement to install the entire Stable Diffusion pipeline and numerous large CLIP or VIT models separately. Our checkpoints already contain the necessary weights, so only **one** model download is required.  
+   - Dependencies like `mmcv`, which can be cumbersome to install, are no longer necessary. Installation is now simpler and more flexible.
+
+6. **Separate Workflows**  
+   - The code is structured into three main directories:  
+     - `train/` for training  
+     - `test/` for testing  
+     - `infer/` for inference  
+   - Each directory contains its own config files, making each workflow highly modular.
+
+
+
+## Setup
+
+1. **Install PyTorch (with or without GPU support)**  
+   - Refer to the [PyTorch installation guide](https://pytorch.org/get-started/previous-versions/) for commands tailored to your environment.  
+   - Example (with CUDA 12.4):
+     ```bash
+     conda install pytorch==2.5.0 torchvision==0.20.0 torchaudio==2.5.0 pytorch-cuda=12.4 -c pytorch -c nvidia
+     ```
+
+2. **Install python3 Dependencies**  
+   - From the repository’s root directory, run:
+     ```bash
+     pip install -r requirements.txt
+     ```
+   - We have **not** pinned specific versions to reduce potential conflicts. Let the dependency resolver pick suitable versions for your system.
+
+3. **(Optional) Download NYU Depth V2 Dataset**  
+   - If you plan to train on the NYU Depth V2 dataset, simply run:
+     ```bash
+     bash download_nyu.sh
+     ```
+   - This downloads and unzips the dataset from [HF dataset `aradhye/nyu_depth_v2`](https://huggingface.co/datasets/aradhye/nyu_depth_v2) into a directory named `nyu_depth_v2` under `datasets`. The filenames are already provided as text files under `filenames/nyu_depth_v2`.
+
+
+
+## Dataset Download (NYU Depth V2)
+
+If you want to replicate our NYU Depth V2 experiments:
+
+1. Run:
+   ```bash
+   bash download_nyu.sh
+   ```
+2. This script:
+   - Downloads NYU Depth V2 from [aradhye/nyu_depth_v2](https://huggingface.co/datasets/aradhye/nyu_depth_v2).
+   - Unzips the dataset in `datasets/nyu_depth_v2/`.
+   - Provides file lists in `filenames/nyu_depth_v2/`.
+
+You can then set the corresponding paths in your JSON configs (see the [Training Workflow](#training-workflow) section).
+
+
+
+## DepthDataset API
+
+`DepthDataset` is a generic dataset class designed for pairs of RGB images and depth maps. It requires an `args` object (which can be a namespace or a dictionary) with the following attributes:
+
+- **`is_train` (bool)**  
+  Indicates whether the dataset is used for training (`True`) or evaluation/testing (`False`). Some augmentations (e.g., random cropping) are only applied in training mode.
+
+- **`filenames_path` (str)**  
+  Path to a text file containing pairs of image and depth map paths, separated by a space. 
+
+- **`data_path` (str)**  
+  A directory path that is prepended to each filename from `filenames_path`. Thus, the actual file loaded is `data_path + path_in_filenames`.
+
+- **`depth_factor` (float)**  
+  Divides the raw depth values to convert them into meters. For NYU Depth V2, `depth_factor=1000.0`; for KITTI, `depth_factor=256.0`.
+
+- **`do_random_crop` (bool)**  
+  Whether to perform random cropping on the image/depth pairs (only if `is_train=True`). If `do_random_crop` is `True`, you must also set:
+  - **`crop_h` (int)**: Crop height  
+  - **`crop_w` (int)**: Crop width  
+
+  If images are smaller than `crop_h`×`crop_w`, zero padding is applied first.
+
+- **`use_cut_depth` (bool)**  
+  Whether to use [CutDepth](https://arxiv.org/abs/2107.07684) to reduce overfitting. We found it helpful for indoor datasets (e.g., NYU Depth V2) but not for outdoor datasets (e.g., KITTI). Only used during training.
+
+
+
+## EcoDepth Model API
+
+`EcoDepth` is implemented as a subclass of PyTorch Lightning’s `LightningModule`. The constructor expects an `args` object with these key attributes:
+
+- **`train_from_scratch` (bool)**  
+  Currently should always be `False`. To train from scratch, you would need the base pretrained weights. Typically, you will **finetune** using our published checkpoints.
+
+- **`eval_crop` (str)**  
+  Determines the evaluation cropping strategy. Possible values:
+  - `"eigen"`: Used for NYU  
+  - `"garg"`: Used for KITTI  
+  - `"custom"`: Implement your own function in `utils.py` and set `eval_crop="custom"`.  
+  - `"none"`: No cropping
+
+- **`no_of_classes` (int)**  
+  Number of scene classes for internal embeddings. For NYU (indoor model) use `100`; for VKITTI (outdoor model) use `200`.
+
+- **`max_depth` (float)**  
+  Maximum depth value the model will predict. Typically:
+  - `10.0` for indoor (NYU)  
+  - `80.0` for outdoor (KITTI)
+
+
+
+## Training Workflow
+
+1. **Navigate to `train/`**  
+2. **Edit `train_config.json`**  
+   - **Data arguments**:  
+     - `train_filenames_path`, `train_data_path`, `train_depth_factor`  
+     - `test_filenames_path`, `test_data_path`, `test_depth_factor`  
+   - **Model arguments**:  
+     - `eval_crop`, `no_of_classes`, `max_depth`  
+   - **Training arguments**:  
+     - `ckpt_path`: Path to a Lightning checkpoint (for finetuning/resuming). If this is an empty string, you must specify `scene="indoor"` or `"outdoor"`, triggering automatic model download.  
+     - `epochs`: Total training epochs  
+     - `weight_decay`, `lr`: Optimizer hyperparameters  
+     - `val_check_interval`: Validation frequency (in training steps)  
+
+3. **Run Training**  
+   ```bash
+   python3 train.py
+   ```
+   PyTorch Lightning will handle checkpointing automatically (by default, in `train/lightning_logs/`).
+
+
+
+## Testing Workflow
+
+1. **Navigate to `test/`**  
+2. **Edit `test_config.json`**  
+   - Similar to training config, but no training arguments.  
+   - Point `ckpt_path` to the checkpoint you want to evaluate, or leave empty if you want to use the provided models.  
+3. **Run Testing**  
+   ```bash
+   python3 test.py
+   ```
+   This script reports evaluation metrics (e.g., RMSE, MAE, δ thresholds).
+
+
+
+## Inference Workflow
+
+There are two scripts provided in the `infer/` directory: one for images (`infer_image.py`) and one for videos (`infer_video.py`).
+
+### Image Inference
+
+1. **Navigate to `infer/`**  
+2. **Edit `image_config.json`**  
+   - **Key arguments**:  
+     - `image_path`: Path to a single image or a directory containing multiple images (recursively processed).  
+     - `outdir`: Output directory for predicted depth maps.  
+     - `resolution`: Scale factor for processing images (higher resolution => more GPU memory usage).  
+     - `flip_test` (bool): Whether to perform horizontal flip as a test-time augmentation.  
+     - `grayscale` (bool): Output in grayscale (if `false`, uses a colorized depth map).  
+     - `pred_only` (bool): Whether to output **only** the depth map.
+
+3. **Run Image Inference**  
+   ```bash
+   python3 infer_image.py
+   ```
+   Results are written to `outdir`, preserving subdirectory structure relative to `image_path`.
+
+### Video Inference
+
+1. **Edit `video_config.json`**  
+   - **Key arguments**:  
+     - `video_path`: Path to the video file.  
+     - `outdir`: Output directory for frames or depth predictions.  
+     - `vmax`: Depth values are clipped to this maximum.  
+2. **Run Video Inference**  
+   ```bash
+   python3 infer_video.py
+   ```
+
+
+
+## Citation
+
+If you find **ECoDepth** helpful in your research or work, please cite our CVPR 2024 paper:
+
 ```
-## Dataset Setup
-You can take a look at the dataset preparation guide for NYUv2 and KITTI from [here](https://github.com/cleinc/bts). After downloading the datasets, change the data paths in the respective bash files to point to your dataset location where you have downloaded the datasets. Alternatively, you can also make a symbolic link of the dataset folders like so:
-``` bash
-cd depth
-mkdir data
-cd data
-ln -s <path_to_kitti_dataset> kitti
-ln -s <path_to_nyu_dataset> nyu
-```
-Note the dataset structure inside the path you have given in the bash files should look like this:  
-**NYUv2**: 
-``` bash
-nyu
-├── nyu_depth_v2
-│   ├── official_splits
-│   └── sync
-```
-**KITTI**: 
-``` bash
-kitti
-├── KITTI
-│   ├── 2011_09_26
-│   ├── 2011_09_28
-│   ├── 2011_09_29
-│   ├── 2011_09_30
-│   └── 2011_10_03
-└── kitti_gt
-    ├── 2011_09_26
-    ├── 2011_09_28
-    ├── 2011_09_29
-    ├── 2011_09_30
-    └── 2011_10_03
-```
-
-## Pretrained Models
-
-Please download the pretrained weights from [this link](https://drive.google.com/drive/folders/1BVWLrdHw0bfsuzzL62S7xpWmmqgvysxd?usp=sharing) and save `.ckpt` weights inside `<repo root>/depth/checkpoints` directory.
-
-Also download the v1-5 checkpoint of [stable-diffusion](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/blob/main/v1-5-pruned-emaonly.ckpt) and put it in the `<repo root>/checkpoints` directory. Please create an empty directory if you find that such a path does not exist. Note that this checkpoints folder is different from the one above. 
-
-## Inference
-
-To perform inference on any RGB image or video use the `infer_{outdoor,indoor}.sh` file. Set the `--img_path` argument to the image you would to get the depth for and the `--video_path` to the video from which to produce the depth. In case you only wish to infer on an img or video, simply remove the other argument. Then enter the `depth` directory by executing `cd depth` and run:
-
-1. **Infer on outdoor scenes**:
-`bash infer_outdoor.sh`
-
-2. **Infer on outdoor scenes**:
-`bash infer_indoor.sh`
-
-## Evaluation
-To evaluate the model performance on NYUv2 and KITTI datasets, use the `test_{kitti, nyu}` file. The trained models are publicly available, download the models using [above links](#pretrained-models). Then, navigate to the `depth` directory and follow the instructions outlined below:
-
-1. **Evaluate on NYUv2 dataset**:  
-`bash test_nyu.sh <path_to_saved_model_of_NYU>`  
-
-2. **Evaluate on KITTI dataset**:  
-`bash test_kitti.sh <path_to_saved_model_of_KITTI>`
-
-## Training 
-We trained our models on 32 batch size using 8xNVIDIA A100 GPUs. Inside the `train_{kitti,nyu}.sh` set the `NPROC_PER_NODE` variable and `--batch_size` argument to the desired values as per your system resources. For our method we set them as `NPROC_PER_NODE=8` and `--batch_size=4` (resulting in a total batch size of 32). Afterwards, navigate to the `depth` directory by executing `cd depth` and follow the instructions:
-
-1. **Train on NYUv2 dataset**:  
-`bash train_nyu.sh`  
-
-1. **Train on KITTI dataset**:  
-`bash train_kitti.sh`
-
-### Contact
-If you have any questions about our code or paper, kindly raise an issue on this repository.
-
-### Acknowledgment
-We thank [Kartik Anand](https://github.com/k-styles) for assistance with the experiments. 
-Our source code is inspired from [VPD](https://github.com/wl-zhao/VPD) and [PixelFormer](https://github.com/ashutosh1807/PixelFormer). We thank their authors for publicly releasing the code.
-
-### BibTeX (Citation)
-If you find our work useful in your research, please consider citing using:
-``` bibtex
 @InProceedings{Patni_2024_CVPR,
-    author    = {Patni, Suraj and Agarwal, Aradhye and Arora, Chetan},
-    title     = {ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation},
-    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-    month     = {June},
-    year      = {2024},
-    pages     = {28285-28295}
+  author    = {Patni, Suraj and Agarwal, Aradhye and Arora, Chetan},
+  title     = {ECoDepth: Effective Conditioning of Diffusion Models for Monocular Depth Estimation},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  month     = {June},
+  year      = {2024},
+  pages     = {28285-28295}
 }
 ```
+
+
+
+**Thank you for using ECoDepth!**  
+For any questions or suggestions, feel free to open an issue. We hope this restructured codebase helps you train on custom datasets and perform fast, efficient inference.

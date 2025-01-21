@@ -1,0 +1,11 @@
+transformers
+lightning
+einops
+omegaconf
+timm
+openai-clip
+matplotlib
+opencv-python
+albumentations
+progressbar
+taming-transformers-rom1504

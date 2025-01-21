@@ -1,0 +1,13 @@
+{
+    "max_depth" : 10.0,
+    "no_of_classes" : 100,
+    "train_from_scratch" : false,
+    "scene" : "indoor",
+    "ckpt_path" : "",
+    "image_path" : "",
+    "resolution" : 3,
+    "pred_only" : false,
+    "outdir" : "./output/",
+    "flip_test" : true,
+    "grayscale" : false
+}

@@ -1,0 +1,14 @@
+{
+    "max_depth" : 10.0,
+    "no_of_classes" : 100,
+    "vmax" : 10,
+    "train_from_scratch" : false,
+    "scene" : "indoor",
+    "ckpt_path" : "",
+    "video_path" : "house.mp4",
+    "resolution" : 3,
+    "pred_only" : false,
+    "outdir" : "./output/",
+    "flip_test" : true,
+    "grayscale" : false
+}
