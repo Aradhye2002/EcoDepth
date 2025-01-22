@@ -35,7 +35,7 @@ train_dataset = DepthDataset(
     depth_factor=args.train_depth_factor
 )
 
-train_loader = DataLoader(train_dataset, num_workers=8)
+train_loader = DataLoader(train_dataset, num_workers=args.num_workers, batch_size=args.batch_size)
 
 val_dataset = DepthDataset(
     args=args, 
@@ -45,7 +45,7 @@ val_dataset = DepthDataset(
     depth_factor=args.val_depth_factor
 )
 
-val_loader = DataLoader(val_dataset, num_workers=8)
+val_loader = DataLoader(val_dataset, num_workers=args.num_workers)
 
 checkpoint_callback = ModelCheckpoint(
     save_top_k=2,

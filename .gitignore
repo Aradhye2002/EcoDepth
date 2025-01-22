@@ -12,3 +12,4 @@ data/*
 log_dir*
 checkpoints/*
 datasets/*
+**/lightning_logs

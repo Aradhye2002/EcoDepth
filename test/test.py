@@ -33,7 +33,7 @@ test_dataset = DepthDataset(
     depth_factor=args.test_depth_factor
 )
 
-test_loader = DataLoader(test_dataset, num_workers=8)
+test_loader = DataLoader(test_dataset, num_workers=args.num_workers)
 
 trainer = L.Trainer(logger=False)
 
