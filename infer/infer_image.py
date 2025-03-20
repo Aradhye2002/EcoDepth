@@ -58,7 +58,7 @@ for k, filename in enumerate(filenames):
     print(f'Progress {k+1}/{len(filenames)}: {filename}')
     
     raw_frame = cv2.imread(filename)
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    frame = cv2.cvtColor(raw_frame, cv2.COLOR_RGB2BGR)
     frame_height, frame_width = frame.shape[:2]
     
     curr_area = frame_width * frame_height
@@ -106,4 +106,4 @@ for k, filename in enumerate(filenames):
         split_region = np.ones((frame_height, margin_width, 3), dtype=np.uint8) * 255
         combined_frame = cv2.hconcat([raw_frame, split_region, depth])
         combined_frame = combined_frame[height_adjustment:, width_adjustment:]
-        cv2.imwrite(combined_frame, depth)
+        cv2.imwrite(output_path, combined_frame)
