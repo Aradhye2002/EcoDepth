@@ -41,7 +41,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is
 model = model.to(DEVICE).eval()
 
 if os.path.isfile(args.image_path):
-    if args.video_path.endswith('txt'):
+    if args.image_path.endswith('txt'):
         with open(args.image_path, 'r') as f:
             lines = f.read().splitlines()
     else:
