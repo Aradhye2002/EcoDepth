@@ -104,10 +104,10 @@ class MyProgressBar():
         else:
             self.pbar.finish()
 
-def download_model(model_str):
+def download_model(model_str, version="ecodepth"):
     os.makedirs("../checkpoints", exist_ok=True)
     save_path = f"../checkpoints/{model_str}"
-    url = f"https://huggingface.co/aradhye/ecodepth/resolve/main/{model_str}"
+    url = f"https://huggingface.co/aradhye/{version}/resolve/main/{model_str}"
     if not os.path.isfile(save_path):
         print(f"Downloading {model_str}")
         request.urlretrieve(url, save_path, MyProgressBar())

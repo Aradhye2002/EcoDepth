@@ -22,7 +22,8 @@ model = EcoDepth(args)
 
 if args.ckpt_path == "":
     model_str = f"weights_{args.scene}.ckpt"
-    download_model(model_str)
+    version = "ecodepthv2" if args.enable_v2 else "ecodepth"
+    download_model(model_str, version)
     args.ckpt_path = f"../checkpoints/{model_str}"
 
 model.load_state_dict(torch.load(args.ckpt_path, map_location="cpu", weights_only=True)["state_dict"])

@@ -10,5 +10,6 @@
     "use_cut_depth" : false,
     "do_random_crop" : false,
     "train_from_scratch" : false,
-    "eval_crop" : "eigen"
+    "eval_crop" : "eigen",
+    "enable_v2": true
 }

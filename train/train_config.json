@@ -20,5 +20,6 @@
     "epochs" : 25,
     "weight_decay" : 0.1,
     "lr" : 1e-5,
-    "val_check_interval" : 200
+    "val_check_interval" : 200,
+    "enable_v2": true
 }

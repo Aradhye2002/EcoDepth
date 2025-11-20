@@ -10,5 +10,6 @@
     "pred_only" : false,
     "outdir" : "./output/",
     "flip_test" : true,
-    "grayscale" : false
+    "grayscale" : false,
+    "enable_v2": true
 }

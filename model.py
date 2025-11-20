@@ -129,36 +129,44 @@ class CIDE(nn.Module):
             self.vit_model = ViTForImageClassification(vit_config)
         else:
             self.vit_model = ViTForImageClassification.from_pretrained(VIT_MODEL, resume_download=True)
-        for param in self.vit_model.parameters():
-            param.requires_grad = False
-        
-        self.fc = nn.Sequential(
-            nn.Linear(1000, 400),
-            nn.GELU(),
-            nn.Linear(400, args.no_of_classes)
-        )
-        self.dim = emb_dim
-        self.m = nn.Softmax(dim=1)
-        
-        self.embeddings = nn.Parameter(torch.randn(self.args.no_of_classes, self.dim))
-        self.embedding_adapter = EmbeddingAdapter(emb_dim=self.dim)
-        
-        self.gamma = nn.Parameter(torch.ones(self.dim) * 1e-4)
-    
+        if not args.enable_v2:
+            for param in self.vit_model.parameters():
+                param.requires_grad = False
+            
+            self.fc = nn.Sequential(
+                nn.Linear(1000, 400),
+                nn.GELU(),
+                nn.Linear(400, args.no_of_classes)
+            )
+            self.dim = emb_dim
+            self.m = nn.Softmax(dim=1)
+            
+            self.embeddings = nn.Parameter(torch.randn(self.args.no_of_classes, self.dim))
+            self.embedding_adapter = EmbeddingAdapter(emb_dim=self.dim)
+            
+            self.gamma = nn.Parameter(torch.ones(self.dim) * 1e-4)
+        else:
+            for param in self.vit_model.classifier.parameters():
+                param.requires_grad = False
+
     def forward(self, x):
         y = pad_to_make_square(x)
         # use torch.no_grad() to prevent gradient flow through the ViT since it is kept frozen
-        with torch.no_grad():
-            inputs = self.vit_processor(images=y, return_tensors="pt").to(x.device)
-            vit_outputs = self.vit_model(**inputs)
-            vit_logits = vit_outputs.logits
+        inputs = self.vit_processor(images=y, return_tensors="pt").to(x.device)
+        if not self.args.enable_v2:
+            with torch.no_grad():
+                vit_outputs = self.vit_model(**inputs)
+                vit_logits = vit_outputs.logits
+                
+            class_probs = self.fc(vit_logits)
+            class_probs = self.m(class_probs)
             
-        class_probs = self.fc(vit_logits)
-        class_probs = self.m(class_probs)
-        
-        class_embeddings = class_probs @ self.embeddings
-        conditioning_scene_embedding = self.embedding_adapter(class_embeddings, self.gamma) 
-        
+            class_embeddings = class_probs @ self.embeddings
+            conditioning_scene_embedding = self.embedding_adapter(class_embeddings, self.gamma) 
+        else:
+            vit_outputs = self.vit_model(**inputs, output_hidden_states=True)
+            last_hidden_state = vit_outputs.hidden_states[-1][:, 0, :]
+            conditioning_scene_embedding = last_hidden_state.unsqueeze(1)
         return conditioning_scene_embedding
         
 class EcoDepth(L.LightningModule):
