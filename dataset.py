@@ -91,11 +91,20 @@ class DepthDataset(Dataset):
         # are smaller than crop size
         if self.args.do_random_crop:
             if H < self.args.crop_h:
-                image = np.concatenate([image, np.zeros((self.args.crop_h-H, W, 3), dtype=np.uint8)], axis=0)
-                depth = np.concatenate([depth, np.zeros((self.args.crop_h-H, W),  dtype=np.uint8)], axis=0)
+                image = np.concatenate(
+                    [image, np.zeros((self.args.crop_h-H, W, 3), dtype=image.dtype)], axis=0
+                )
+                depth = np.concatenate(
+                    [depth, np.zeros((self.args.crop_h-H, W), dtype=depth.dtype)], axis=0
+                )
             if W < self.args.crop_w:
-                image = np.concatenate([image, np.zeros((self.args.crop_h, self.args.crop_w-W, 3),  dtype=np.uint8)], axis=0)
-                depth = np.concatenate([depth, np.zeros((self.args.crop_h, self.args.crop_w-W),  dtype=np.uint8)], axis=0)
+                pad_w = self.args.crop_w - W
+                image = np.concatenate(
+                    [image, np.zeros((image.shape[0], pad_w, 3), dtype=image.dtype)], axis=1
+                )
+                depth = np.concatenate(
+                    [depth, np.zeros((depth.shape[0], pad_w), dtype=depth.dtype)], axis=1
+                )
 
         additional_targets = {"depth" : "mask"}
         aug = A.Compose(
